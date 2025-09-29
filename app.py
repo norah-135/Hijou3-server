@@ -95,13 +95,13 @@ def transcribe():
             return jsonify({"success": False, "error": f"Unsupported format. Allowed: {', '.join(ALLOWED_EXTENSIONS)}"}), 400
 
         filename = secure_filename(file.filename) or "audio_file"
-        with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{filename}") as temp_file:
-            temp_file_path = temp_file.name
-            file.save(temp_file_path)
-            logger.info(f"Saved file: {temp_file_path}")
+        temp_dir = tempfile.gettempdir()
+        temp_file_path = os.path.join(temp_dir, filename)
+        file.save(temp_file_path)
+        logger.info(f"Saved uploaded file to: {temp_file_path}")
 
         file_size = os.path.getsize(temp_file_path)
-        logger.info(f"File size: {file_size} bytes")
+        logger.info(f"Processing file: {filename}, Size: {file_size} bytes")
 
         result = transcribe_audio(temp_file_path)
         if result["success"]:
@@ -141,4 +141,4 @@ def internal_error(error):
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 10000))
-    app.run(host='0.0.0.0', port=10000)
+    app.run(host='0.0.0.0', port=port)
